@@ -7,6 +7,10 @@ import (
 	"github.com/0xEDU/go-crud-poc/cmd/go-crud-poc/repository"
 )
 
+func DeleteItem(oldItem model.Item) (model.Item, error){
+	return repository.DeleteItem(oldItem)
+}
+
 func GetAllItems() ([]model.Item, error) {
 	return repository.GetAllItems()
 }

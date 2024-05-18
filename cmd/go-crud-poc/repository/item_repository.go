@@ -48,3 +48,20 @@ func AddItem(item *model.Item) error {
 	items = append(items, *item)
 	return nil
 }
+
+func DeleteItem(oldItem model.Item) (model.Item, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	index := -1
+	for i, item := range items {
+		if item.ID == oldItem.ID {
+			index = i
+			break
+		}
+	}
+	if index != -1 {
+		items = append(items[:index], items[index+1:]...)
+		return oldItem, nil
+	}
+	return model.Item{}, errors.New("Couldn't delete item.")
+}

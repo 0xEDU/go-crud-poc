@@ -21,9 +21,26 @@ func ItemsHandler(w http.ResponseWriter, r *http.Request) {
 	case "PUT":
 		log.Println("Update item")
 		updateItem(w, r)
+	case "DELETE":
+		log.Println("Delete item")
+		deleteItem(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func deleteItem(w http.ResponseWriter, r *http.Request) {
+	var item model.Item
+	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	deletedItem, err := service.DeleteItem(item)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	view.JSON(w, http.StatusOK, deletedItem)
 }
 
 func updateItem(w http.ResponseWriter, r *http.Request) {
