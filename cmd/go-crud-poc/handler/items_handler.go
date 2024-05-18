@@ -18,9 +18,26 @@ func ItemsHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		log.Println("Create item")
 		createItem(w, r)
+	case "PUT":
+		log.Println("Update item")
+		updateItem(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func updateItem(w http.ResponseWriter, r *http.Request) {
+	var newItem model.Item
+	if err := json.NewDecoder(r.Body).Decode(&newItem); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	updatedItem, err := service.UpdateItem(newItem)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	view.JSON(w, http.StatusOK, updatedItem)
 }
 
 func createItem(w http.ResponseWriter, r *http.Request) {
