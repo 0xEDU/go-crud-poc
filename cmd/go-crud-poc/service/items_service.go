@@ -1,18 +1,23 @@
 package service
 
 import (
-	"sync"
+	"errors"
 
 	"github.com/0xEDU/go-crud-poc/cmd/go-crud-poc/model"
-)
-
-var (
-	items = []model.Item{}
-	mu sync.Mutex
+	"github.com/0xEDU/go-crud-poc/cmd/go-crud-poc/repository"
 )
 
 func GetAllItems() ([]model.Item, error) {
-	mu.Lock()
-	defer mu.Unlock()
-	return items, nil
+	return repository.GetAllItems()
+}
+
+func CreateItem(item model.Item) (model.Item, error) {
+	if item.Name == "" {
+		return model.Item{}, errors.New("Item name cannot be empty")
+	}
+	err := repository.AddItem(&item)
+	if err != nil {
+		return model.Item{}, err
+	}
+	return item, nil
 }
