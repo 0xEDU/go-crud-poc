@@ -7,30 +7,40 @@ import (
 	"github.com/0xEDU/go-crud-poc/cmd/go-crud-poc/repository"
 )
 
-func DeleteItem(oldItem model.Item) (model.Item, error){
-	return repository.DeleteItem(oldItem)
+type ItemsService struct {
+	repo repository.ItemsRepository
 }
 
-func GetAllItems() ([]model.Item, error) {
-	return repository.GetAllItems()
+func NewItemsService(repo repository.ItemsRepository) *ItemsService {
+	return &ItemsService{
+		repo: repo,
+	}
 }
 
-func GetItem(id int) (model.Item, error) {
-	return repository.GetItem(id)
+func (service *ItemsService) DeleteItem(oldItem model.Item) (model.Item, error){
+	return service.repo.DeleteItem(oldItem)
 }
 
-func UpdateItem(newItem model.Item) (model.Item, error) {
+func (service *ItemsService) GetAllItems() ([]model.Item, error) {
+	return service.repo.GetAllItems()
+}
+
+func (service *ItemsService) GetItem(id int) (model.Item, error) {
+	return service.repo.GetItem(id)
+}
+
+func (service *ItemsService) UpdateItem(newItem model.Item) (model.Item, error) {
 	if newItem.Name == "" {
 		return model.Item{}, errors.New("Item name cannot be empty")
 	}
-	return repository.UpdateItem(newItem)
+	return service.repo.UpdateItem(newItem)
 }
 
-func CreateItem(item model.Item) (model.Item, error) {
+func (service *ItemsService) CreateItem(item model.Item) (model.Item, error) {
 	if item.Name == "" {
 		return model.Item{}, errors.New("Item name cannot be empty")
 	}
-	err := repository.AddItem(&item)
+	err := service.repo.AddItem(&item)
 	if err != nil {
 		return model.Item{}, err
 	}

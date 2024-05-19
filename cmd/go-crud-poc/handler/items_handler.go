@@ -10,32 +10,42 @@ import (
 	"github.com/0xEDU/go-crud-poc/cmd/go-crud-poc/view"
 )
 
-func ItemsHandler(w http.ResponseWriter, r *http.Request) {
+type ItemsHandler struct {
+	svc *service.ItemsService
+}
+
+func NewItemsHandler(svc *service.ItemsService) *ItemsHandler {
+	return &ItemsHandler{
+		svc: svc,
+	}
+}
+
+func (handler *ItemsHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		log.Println("Get items")
-		getItems(w)
+		handler.getItems(w)
 	case "POST":
 		log.Println("Create item")
-		createItem(w, r)
+		handler.createItem(w, r)
 	case "PUT":
 		log.Println("Update item")
-		updateItem(w, r)
+		handler.updateItem(w, r)
 	case "DELETE":
 		log.Println("Delete item")
-		deleteItem(w, r)
+		handler.deleteItem(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
-func deleteItem(w http.ResponseWriter, r *http.Request) {
+func (handler *ItemsHandler) deleteItem(w http.ResponseWriter, r *http.Request) {
 	var item model.Item
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	deletedItem, err := service.DeleteItem(item)
+	deletedItem, err := handler.svc.DeleteItem(item)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -43,13 +53,13 @@ func deleteItem(w http.ResponseWriter, r *http.Request) {
 	view.JSON(w, http.StatusOK, deletedItem)
 }
 
-func updateItem(w http.ResponseWriter, r *http.Request) {
+func (handler *ItemsHandler) updateItem(w http.ResponseWriter, r *http.Request) {
 	var newItem model.Item
 	if err := json.NewDecoder(r.Body).Decode(&newItem); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	updatedItem, err := service.UpdateItem(newItem)
+	updatedItem, err := handler.svc.UpdateItem(newItem)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -57,13 +67,13 @@ func updateItem(w http.ResponseWriter, r *http.Request) {
 	view.JSON(w, http.StatusOK, updatedItem)
 }
 
-func createItem(w http.ResponseWriter, r *http.Request) {
+func (handler *ItemsHandler) createItem(w http.ResponseWriter, r *http.Request) {
 	var item model.Item
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	createdItem, err := service.CreateItem(item)
+	createdItem, err := handler.svc.CreateItem(item)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -71,8 +81,8 @@ func createItem(w http.ResponseWriter, r *http.Request) {
 	view.JSON(w, http.StatusCreated, createdItem)
 }
 
-func getItems(w http.ResponseWriter) {
-	items, err := service.GetAllItems()
+func (handler *ItemsHandler) getItems(w http.ResponseWriter) {
+	items, err := handler.svc.GetAllItems()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
